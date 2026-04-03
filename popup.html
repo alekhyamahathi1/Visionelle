@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jam</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 380px;
+      min-height: 500px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(160deg, #fce4ec 0%, #e8eaf6 40%, #e1f5fe 100%);
+      color: #37474f;
+    }
+
+    .header {
+      padding: 24px 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e91e63, #7c4dff, #2196f3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      font-size: 12px;
+      color: #90a4ae;
+      margin-top: 4px;
+    }
+
+    .status-card {
+      margin: 0 16px 16px;
+      padding: 20px;
+      border-radius: 20px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .status-icon { font-size: 40px; margin-bottom: 8px; }
+    .status-label {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .status-url {
+      font-size: 11px;
+      color: #90a4ae;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .status-time {
+      font-size: 11px;
+      color: #b0bec5;
+      margin-top: 6px;
+    }
+
+    .status-safe { border-left: 4px solid #66bb6a; }
+    .status-safe .status-label { color: #2e7d32; }
+    .status-harmful { border-left: 4px solid #e91e63; }
+    .status-harmful .status-label { color: #c2185b; }
+    .status-fake { border-left: 4px solid #ff9800; }
+    .status-fake .status-label { color: #e65100; }
+
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .keyword {
+      background: linear-gradient(135deg, #fce4ec, #e8eaf6);
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #7c4dff;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #78909c;
+      padding: 0 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .demo-area {
+      margin: 0 16px 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .demo-area textarea {
+      width: 100%;
+      height: 70px;
+      border: 2px solid #e8eaf6;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .demo-area textarea:focus {
+      border-color: #7c4dff;
+    }
+    .demo-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #e91e63, #7c4dff, #2196f3);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .demo-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124, 77, 255, 0.3);
+    }
+    .demo-result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: none;
+      text-align: center;
+      font-weight: 600;
+    }
+    .demo-result.safe { background: #e8f5e9; color: #2e7d32; display: block; }
+    .demo-result.harmful { background: #fce4ec; color: #c2185b; display: block; }
+    .demo-result.fake { background: #fff3e0; color: #e65100; display: block; }
+
+    .logs-area {
+      margin: 0 16px 16px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .log-item {
+      background: white;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .log-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .log-dot.safe { background: #66bb6a; }
+    .log-dot.harmful { background: #e91e63; }
+    .log-dot.fake { background: #ff9800; }
+    .log-text {
+      font-size: 11px;
+      color: #607d8b;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .log-time {
+      font-size: 10px;
+      color: #b0bec5;
+      flex-shrink: 0;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 12px;
+      font-size: 10px;
+      color: #b0bec5;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍇 Jam</h1>
+    <p>Keeping the internet safe for you</p>
+  </div>
+
+  <div id="statusCard" class="status-card status-safe">
+    <div class="status-icon" id="statusIcon">✅</div>
+    <div class="status-label" id="statusLabel">All Clear!</div>
+    <div class="status-url" id="statusUrl">No page scanned yet</div>
+    <div class="status-time" id="statusTime"></div>
+    <div class="keywords" id="statusKeywords"></div>
+  </div>
+
+  <div class="section-title">🧪 Demo Mode</div>
+  <div class="demo-area">
+    <textarea id="demoInput" placeholder="Type or paste text to analyze...&#10;Try: 'How to hack someone's account'"></textarea>
+    <button class="demo-btn" id="demoBtn">🔍 Analyze Text</button>
+    <div class="demo-result" id="demoResult"></div>
+  </div>
+
+  <div class="section-title">📋 Recent Activity</div>
+  <div class="logs-area" id="logsArea">
+    <div style="text-align:center;padding:20px;color:#b0bec5;font-size:12px;">No activity yet</div>
+  </div>
+
+  <div class="footer">Jam v1.0 · Made with 💜 for safer browsing</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
