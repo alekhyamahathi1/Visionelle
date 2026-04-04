@@ -1,13 +1,12 @@
 // Dataset for classification
-// Use shared expanded dataset
-let DATASET_SIZE = 0;
-fetch(chrome.runtime.getURL('dataset.js')).then(r => r.text()).then(script => {
-  const s = document.createElement('script');
-  s.textContent = script;
-  document.head.appendChild(s);
-}).finally(() => {
-  setTimeout(() => DATASET_SIZE = window.DATASET ? window.DATASET.length : 500, 200);
-});
+const DATASET = [
+  { text: "The water cycle includes evaporation, condensation, and precipitation.", category: "SAFE", keywords: ["water cycle", "science", "education"] },
+  { text: "You can improve your coding skills by practicing daily.", category: "SAFE", keywords: ["coding", "learning", "practice"] },
+  { text: "Drinking only lemon water can cure all diseases instantly.", category: "FAKE", keywords: ["cure", "instant", "disease"] },
+  { text: "The Earth is flat and space agencies are lying.", category: "FAKE", keywords: ["flat earth", "misinformation"] },
+  { text: "How to hack someone's account easily.", category: "HARMFUL", keywords: ["hack", "account", "exploit"] },
+  { text: "Ways to bypass school restrictions and access blocked sites.", category: "HARMFUL", keywords: ["bypass", "restricted", "proxy"] }
+];
 const HARMFUL_KEYWORDS = ["hack", "exploit", "bypass", "restricted", "proxy", "weapon", "drug", "violence", "kill", "attack", "steal"];
 const FAKE_KEYWORDS = ["cure all", "instant", "flat earth", "misinformation", "conspiracy", "hoax", "secret they don't want", "miracle"];
 
@@ -68,11 +67,10 @@ function renderLogs(logs) {
   });
 }
 
-// Load last scan + queue stats
-chrome.storage.local.get(["lastScan", "activityLogs", "unsupervisedQueueLength"], (data) => {
+// Load last scan
+chrome.storage.local.get(["lastScan", "activityLogs"], (data) => {
   if (data.lastScan) updateStatus(data.lastScan);
   if (data.activityLogs) renderLogs(data.activityLogs);
-  document.getElementById('queueLength') ? document.getElementById('queueLength').textContent = data.unsupervisedQueueLength || 0 : null;
 });
 
 // Listen for updates
@@ -82,14 +80,6 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 // Demo mode
-// Add export button functionality (if exists)
-const exportBtn = document.getElementById("exportBtn");
-if (exportBtn) {
-  exportBtn.addEventListener("click", () => {
-    window.DATASET.exportDataset ? window.DATASET.exportDataset() : alert("Export available in console");
-  });
-}
-
 document.getElementById("demoBtn").addEventListener("click", () => {
   const text = document.getElementById("demoInput").value.trim();
   if (!text) return;
