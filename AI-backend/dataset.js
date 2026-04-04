@@ -1,89 +1,25 @@
-// -------------------------------
-// Harmful Content Keywords
-// -------------------------------
+// dataset.js
 
-const harmfulKeywords = [
-
-  "kill",
-  "attack",
-  "hack",
-  "destroy",
-  "bomb",
-  "shoot",
-  "threat",
-  "violence",
-  "die",
-  "assault",
-  "exploit",
-  "breach",
-  "malware",
-  "virus",
-  "steal",
-  "fraud",
-  "phishing",
-  "crack",
-  "break into",
-  "take down",
-  "leak data",
-  "data theft",
-  "illegal access"
-
-];
-
-
-
-// -------------------------------
-// Harmful Intent Phrases
-// (Very Important — Strong Signals)
-// -------------------------------
-
-const harmfulPhrases = [
-
-  "i will attack",
-  "i will hack",
-  "i will kill",
-  "i will destroy",
-  "i will break into",
-  "i will steal",
-  "how to hack",
-  "how to destroy",
-  "how to attack",
-  "how to steal data"
-
-];
-
-
-
-// -------------------------------
-// Fake / Misleading Keywords
-// -------------------------------
-
-const fakeKeywords = [
-
-  "miracle cure",
-  "guaranteed results",
-  "100% cure",
-  "instant cure",
-  "fake news",
-  "click here to win",
-  "limited time offer",
-  "lose weight instantly",
-  "earn money fast",
-  "secret formula",
-  "shocking truth",
-  "doctors hate this",
-  "one simple trick"
-
-];
-
-
-
-// Export datasets
-
-module.exports = {
-
-  harmfulKeywords,
-  harmfulPhrases,
-  fakeKeywords
-
+const keywordsByAge = {
+  "0-6": {
+    harmful: ["violence", "drugs"],
+    fake: ["miracle cure", "magic trick"]
+  },
+  "7-12": {
+    harmful: ["hack", "exploit", "cheat"],
+    fake: ["flat earth", "fake news"]
+  },
+  "13-18": {
+    harmful: ["account hack", "bypass restrictions", "self-harm"],
+    fake: ["get rich quick", "miracle diet"]
+  }
 };
+
+function getKeywordsForAge(age) {
+  if (age >= 0 && age <= 6) return keywordsByAge["0-6"];
+  if (age >= 7 && age <= 12) return keywordsByAge["7-12"];
+  if (age >= 13 && age <= 18) return keywordsByAge["13-18"];
+  return { harmful: [], fake: [] };
+}
+
+module.exports = { getKeywordsForAge };

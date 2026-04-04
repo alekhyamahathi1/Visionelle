@@ -1,161 +1,61 @@
-// Import required modules
-
+// fileAnalyzer.js
 const fs = require("fs");
+const { getKeywordsForAge } = require("./dataset");
 
-const {
-  harmfulKeywords,
-  harmfulPhrases,
-  fakeKeywords
-} = require("./dataset");
-
-
-
-// -------------------------------
-// Harmful Detection
-// -------------------------------
-
-function containsHarmful(input) {
-
-  const text = input.toLowerCase();
-
-  let harmfulScore = 0;
-
-  // Phrase detection
-
-  harmfulPhrases.forEach(phrase => {
-
-    if (text.includes(phrase)) {
-      harmfulScore += 3;
-    }
-
-  });
-
-  // Keyword detection
-
-  harmfulKeywords.forEach(word => {
-
-    if (text.includes(word)) {
-      harmfulScore += 1;
-    }
-
-  });
-
-  return harmfulScore;
-}
-
-
-
-// -------------------------------
-// Fake Detection
-// -------------------------------
-
-function containsFake(input) {
-
-  const text = input.toLowerCase();
-
-  let fakeScore = 0;
-
-  fakeKeywords.forEach(word => {
-
-    if (text.includes(word)) {
-      fakeScore += 1;
-    }
-
-  });
-
-  if (text.includes("100%") && text.includes("guarantee")) {
-    fakeScore += 2;
+// Function to generate descriptive reason
+function generateReason(category, detectedKeywords) {
+  if (category === "SAFE") return "No harmful or fake content detected.";
+  
+  if (category === "HARMFUL") {
+    return `Harmful content detected due to keywords: ${detectedKeywords.join(", ")}.`;
   }
 
-  return fakeScore;
-}
-
-
-
-// -------------------------------
-// Confidence Calculator
-// -------------------------------
-
-function getConfidence(score) {
-
-  let percentage = Math.min(score * 20, 100);
-
-  return percentage + "%";
-}
-
-
-
-// -------------------------------
-// Analyzer
-// -------------------------------
-
-function analyzeText(input) {
-
-  const harmfulScore = containsHarmful(input);
-  const fakeScore = containsFake(input);
-
-  if (harmfulScore >= 2) {
-
-    return {
-      category: "HARMFUL",
-      confidence: getConfidence(harmfulScore),
-      reason: "Harmful intent detected"
-    };
-
+  if (category === "FAKE") {
+    return `Potentially misleading or fake content detected: ${detectedKeywords.join(", ")}.`;
   }
 
-  if (fakeScore >= 1) {
+  return "Content analysis completed.";
+}
 
-    return {
-      category: "FAKE",
-      confidence: getConfidence(fakeScore),
-      reason: "Fake or misleading claim detected"
-    };
+// Function to analyze content
+function analyzeContent(text, age) {
+  const keywords = getKeywordsForAge(age);
+  const lowerText = text.toLowerCase();
 
+  let category = "SAFE";
+  let detectedKeywords = [];
+
+  // Check harmful keywords
+  for (const word of keywords.harmful) {
+    if (lowerText.includes(word)) {
+      category = "HARMFUL";
+      detectedKeywords.push(word);
+    }
   }
+
+  // Check fake keywords if not harmful
+  if (category === "SAFE") {
+    for (const word of keywords.fake) {
+      if (lowerText.includes(word)) {
+        category = "FAKE";
+        detectedKeywords.push(word);
+      }
+    }
+  }
+
+  const reason = generateReason(category, detectedKeywords);
 
   return {
-    category: "SAFE",
-    confidence: "10%",
-    reason: "No suspicious patterns detected"
+    category,
+    detectedKeywords,
+    reason
   };
-
 }
 
-
-
-// -------------------------------
-// FILE READER
-// -------------------------------
-
-function analyzeFile(filePath) {
-
-  try {
-
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    const result = analyzeText(content);
-
-    console.log("\nFile Analysis Result:");
-    console.log(result);
-
-  }
-
-  catch (error) {
-
-    console.log("\nError reading file.");
-    console.log("Check file path.");
-
-  }
-
+// Function to analyze file content
+function analyzeFile(filePath, age) {
+  const content = fs.readFileSync(filePath, "utf-8");
+  return analyzeContent(content, age);
 }
 
-
-
-// -------------------------------
-// TEST FILE
-// -------------------------------
-
-// Change this filename to test different files
-
-analyzeFile("sample.txt");
+module.exports = { analyzeContent, analyzeFile };
