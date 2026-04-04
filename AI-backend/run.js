@@ -1,8 +1,11 @@
-// run.js
 const readline = require("readline");
 const { analyzeFile } = require("./fileAnalyzer");
+const fs = require("fs");
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 rl.question("Enter child age: ", (ageInput) => {
   const age = parseInt(ageInput);
@@ -13,6 +16,12 @@ rl.question("Enter child age: ", (ageInput) => {
   }
 
   rl.question("Enter file path to analyze: ", async (filePath) => {
+    if (!fs.existsSync(filePath)) {
+      console.log("File does not exist!");
+      rl.close();
+      return;
+    }
+
     try {
       const result = await analyzeFile(filePath, age);
       console.log("\nAnalysis Result:");

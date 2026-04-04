@@ -1,31 +1,14 @@
-// fileAnalyzer.js
 const fs = require("fs");
 const { getKeywordsForAge } = require("./dataset");
+const { analyzeWithGemini } = require("./geminiAPI");
 
-// Function to generate descriptive reason
-function generateReason(category, detectedKeywords) {
-  if (category === "SAFE") return "No harmful or fake content detected.";
-  
-  if (category === "HARMFUL") {
-    return `Harmful content detected due to keywords: ${detectedKeywords.join(", ")}.`;
-  }
-
-  if (category === "FAKE") {
-    return `Potentially misleading or fake content detected: ${detectedKeywords.join(", ")}.`;
-  }
-
-  return "Content analysis completed.";
-}
-
-// Function to analyze content
-function analyzeContent(text, age) {
+// Local keyword-based analyzer
+function analyzeContentLocal(text, age) {
   const keywords = getKeywordsForAge(age);
   const lowerText = text.toLowerCase();
-
   let category = "SAFE";
   let detectedKeywords = [];
 
-  // Check harmful keywords
   for (const word of keywords.harmful) {
     if (lowerText.includes(word)) {
       category = "HARMFUL";
@@ -33,7 +16,6 @@ function analyzeContent(text, age) {
     }
   }
 
-  // Check fake keywords if not harmful
   if (category === "SAFE") {
     for (const word of keywords.fake) {
       if (lowerText.includes(word)) {
@@ -43,19 +25,29 @@ function analyzeContent(text, age) {
     }
   }
 
-  const reason = generateReason(category, detectedKeywords);
-
-  return {
-    category,
-    detectedKeywords,
-    reason
-  };
+  return { category, detectedKeywords };
 }
 
-// Function to analyze file content
-function analyzeFile(filePath, age) {
+// Main function (Gemini + fallback)
+async function analyzeFile(filePath, age) {
   const content = fs.readFileSync(filePath, "utf-8");
-  return analyzeContent(content, age);
+
+  try {
+    const geminiResult = await analyzeWithGemini(content);
+    return {
+      category: geminiResult.category,
+      confidence: geminiResult.confidence,
+      detectedKeywords: [],
+      source: "GEMINI",
+    };
+  } catch (err) {
+    const localResult = analyzeContentLocal(content, age);
+    return {
+      ...localResult,
+      confidence: null,
+      source: "LOCAL_BACKUP",
+    };
+  }
 }
 
-module.exports = { analyzeContent, analyzeFile };
+module.exports = { analyzeFile };
