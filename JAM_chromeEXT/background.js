@@ -32,14 +32,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
   }
 
-  if (msg.type === "QUEUE_UNSUPERVISED") {
-    unsupervisedQueue.push(msg.data);
-    if (unsupervisedQueue.length > 1000) unsupervisedQueue = unsupervisedQueue.slice(-1000);
-    chrome.storage.local.set({ unsupervisedQueueLength: unsupervisedQueue.length });
-    sendResponse({ queued: true });
-    return true;  // Async response
-  }
-
   if (msg.type === "ANALYZE_TEXT") {
     // Demo analysis from popup
     sendResponse({ received: true });
@@ -50,18 +42,3 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 chrome.storage.local.get("activityLogs", (data) => {
   if (data.activityLogs) logs = data.activityLogs;
 });
-
-// Unsupervised data queue for retraining
-let unsupervisedQueue = [];
-
-// Periodic retrain (every 5 min or 50 items)
-setInterval(() => {
-  if (unsupervisedQueue.length >= 10) {
-    const batch = unsupervisedQueue.splice(0, 20);  // Batch size 20
-    fetch('http://localhost:8000/train/batch', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({texts: batch.map(l => l.text || l.content)})
-    }).then(r => r.json()).then(console.log).catch(console.error);
-  }
-}, 300000);  // 5 min
