@@ -1,220 +1,135 @@
-# 🧠 TruthLens Kids (Jim & Jam)
+# 🛡️ Jim & Jam — SafeNet
+
+> *Protecting young minds online — not by locking them out, but by lighting the way.*
+
+---
 
 ## 🌍 Problem Statement
 
-With the rapid rise of AI-generated content, children today are increasingly exposed to misleading, harmful, or manipulative information online. Existing parental control tools focus heavily on blocking or monitoring, but they fail to **educate or guide children toward independent thinking**.
+Children today browse the internet largely unsupervised, exposed to harmful content and AI-generated misinformation they cannot yet critically evaluate. Existing parental control tools focus on blocking or screen-time limits but fail to detect misleading content in real time or give parents meaningful visibility into what their child actually encounters.
 
-This creates a critical gap:
-- Kids cannot differentiate between **real and AI-generated fake content**
-- Parents lack **real-time visibility and meaningful insights**
-- Current systems are either **too restrictive or too passive**
+**The gap:** No current tool combines real-time AI content analysis, child-friendly intervention, and live parent awareness in a single system.
 
 ---
 
 ## 💡 Our Solution
 
-**TruthLens Kids** introduces a balanced, intelligent system that not only protects children but also **guides them toward safer and smarter digital behavior**.
+SafeNet is a two-component system:
 
-The system consists of two core components:
+**Jam** — a Chrome extension installed on the child's browser that silently scans webpage content and intervenes when harmful or misleading content is detected.
 
-### 👨‍👩‍👧 Jim (Parent Dashboard)
-A real-time monitoring and analytics platform that provides parents with **live insights, alerts, and reports** about their child’s online activity.
+**Jim** — a web dashboard for parents that receives real-time alerts from Jam, showing what was detected, when, and on which page.
 
-### 🌐 Jam (Chrome Extension for Kids)
-A lightweight browser extension that runs silently in the background, analyzing content in real time and **gently protecting children from harmful or misleading information**.
+Together they give children a safer browsing experience and give parents real-time awareness — without invasive surveillance.
 
 ---
 
-## ✨ Key Features
+## ⚙️ How It Works
 
-### 🛡️ Smart Content Monitoring
-- Extracts visible text from webpages
-- Monitors input fields (for demo simulation)
-- Continuously scans browsing activity
+1. Jam reads visible text from the webpage the child is visiting
+2. The text is sent to the backend hosted on Vultr
+3. The backend passes it to the Gemini API for classification
+4. Content is classified as **SAFE**, **FAKE**, or **HARMFUL**
+5. Jam applies the appropriate response on the child's screen
+6. The event is logged and pushed to Jim in real time
 
-### 🤖 AI-Based Content Classification
-- Classifies content into:
-  - SAFE
-  - HARMFUL
-  - FAKE (misleading AI-generated content)
+---
 
-### 🚫 Protective Blocking System
-- Harmful content:
-  - Page blur/block
-  - Friendly safety overlay
-- Fake content:
-  - Warning indicator (not blocked)
+## ✨ Features
 
-### 📊 Real-Time Parent Dashboard (Jim)
-- Live alert stream with:
-  - Timestamp
-  - Content snippet
-  - Classification
-  - Device ID
-- Dashboard analytics:
-  - Total alerts
-  - Harmful vs Fake detection count
-- Historical reports:
-  - Daily/weekly summaries
-  - Trend visualizations
+### Jam (Chrome Extension)
+- Scans page content every 5 seconds and on page load
+- Classifies content using the Gemini API
+- **HARMFUL** content — blurs the page and shows a friendly block overlay
+- **FAKE** content — shows a dismissible warning banner at the top of the page
+- **SAFE** content — no interruption, browsing continues normally
+- Popup UI showing current page status in a pink/purple/blue theme
+- Demo mode — manual text input to simulate and test classifications
 
-### ⚡ Real-Time Updates
-- Instant sync between extension and dashboard
-- Alerts triggered immediately on detection
-
-### 🔔 Notifications
-- Popup alerts for harmful activity
-- Real-time feedback loop for parents
-
-### 🧩 Keyword Management
-- Parents can:
-  - Add/remove keywords
-- Used to strengthen filtering logic
-
-### 🧪 Demo Mode
-- Manual text input simulation
-- Live classification preview
-- Perfect for hackathon demos
+### Jim (Parent Dashboard)
+- Live activity feed showing timestamp, URL, classification, and detected keywords
+- Summary stats — total alerts, harmful count, fake count
+- Keyword management — parents can add or remove custom filter keywords
+- Reports page — daily and weekly trend charts from historical logs
+- Popup notification when harmful content is detected
+- Demo mode — manual input to simulate a detection and watch it appear in the live feed
 
 ---
 
 ## 🏗️ System Architecture
 
-### 🔗 Flow Overview
-
-1. **Jam Extension**
-   - Extracts webpage content
-   - Sends data to backend
-
-2. **Backend (Hosted on Vultr)**
-   - Processes and routes requests
-   - Stores logs and keywords
-
-3. **AI Analysis Layer**
-   - Content classification (SAFE / HARMFUL / FAKE)
-
-4. **Real-Time Data Layer**
-   - Live logs streamed to dashboard
-
-5. **Jim Dashboard**
-   - Displays alerts, reports, analytics
+| Layer | Technology | Role |
+|-------|-----------|------|
+| Chrome Extension | Manifest V3, Vanilla JS | Content scanning, overlays, popup UI |
+| AI Classification | Google Gemini API | SAFE / FAKE / HARMFUL classification |
+| Backend | Node.js on Vultr | API routing, logging, keyword storage |
+| Live Data | SpacetimeDB | Real-time alert streaming to Jim |
+| Historical Data | DynamoDB | Log storage for reports |
+| Real-Time Transport | WebSocket / Superplane | Instant push updates to dashboard |
+| Parent Dashboard | HTML, CSS, Chart.js | Monitoring UI |
 
 ---
 
-## 🧱 Tech Stack & Integrations
+## 📡 API Endpoints
 
-### 🌐 Frontend
-- Chrome Extension (Jam)
-- Dashboard UI (Jim)
-
-### ⚙️ Backend
-- Hosted APIs (Vultr)
-- REST Endpoints:
-  - `/analyze`
-  - `/logs/live`
-  - `/logs/history`
-  - `/keywords`
-
-### 🗄️ Database
-- Real-time logs storage
-- Historical data tracking
-
-### ⚡ Real-Time Systems
-- Live alert streaming
-- Instant dashboard updates
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/analyze` | POST | Send content for AI classification |
+| `/logs/live` | GET | Fetch live alerts for Jim feed |
+| `/logs/history` | GET | Fetch historical data for reports |
+| `/keywords` | GET / POST / DELETE | Manage parent-defined keywords |
 
 ---
 
-## 📡 API Structure
+## 🗃️ Classification Dataset (Demo/Fallback)
 
-| Endpoint         | Description                          |
-|----------------|--------------------------------------|
-| `/analyze`      | Receives content for classification  |
-| `/logs/live`    | Streams real-time alerts             |
-| `/logs/history` | Fetches historical reports           |
-| `/keywords`     | Manage filtering keywords            |
+Used when the backend is unavailable, for testing and demo purposes:
 
----
-
-## 🧪 Dataset for Simulation
-
-Used for demo/testing:
-
-- SAFE → Normal browsing allowed
-- FAKE → Warning shown
-- HARMFUL → Block + alert triggered
-
-Each interaction generates:
-- Timestamp
-- URL (mock)
-- Category
-- Keywords
+| Category | Example | Response |
+|----------|---------|----------|
+| SAFE | "The water cycle includes evaporation and condensation." | ✅ Allow |
+| FAKE | "Drinking lemon water cures all diseases instantly." | ⚠️ Warning |
+| FAKE | "The Earth is flat and space agencies are lying." | ⚠️ Warning |
+| HARMFUL | "How to hack someone's account easily." | 🚫 Block |
+| HARMFUL | "Ways to bypass school restrictions using proxy." | 🚫 Block |
 
 ---
 
-## 🎨 UI/UX Design
+## 🎨 Design
 
-### Jam (Extension)
-- Soft gradient theme (Pink, Purple, Blue)
-- Minimal, kid-friendly interface
-- Non-threatening language
+**Jam** uses a soft pink, purple, and blue gradient palette on a dark background. Language in all overlays is friendly and age-appropriate — never alarming.
 
-### Jim (Dashboard)
-- Clean modern layout
-- Sidebar navigation:
-  - Dashboard
-  - Alerts
-  - Reports
-  - Settings
+**Jim** uses a clean dark dashboard layout with sidebar navigation (Dashboard, Alerts, Reports, Keywords, Demo). Color coding is consistent: green for safe, amber for fake, red for harmful.
 
 ---
 
-## 🚀 Innovation Highlights
+## 🚀 What Makes This Different
 
-- Focus on **guidance, not restriction**
-- Detects **AI-generated fake content**, not just harmful content
-- **Real-time parent awareness**
-- Privacy-first approach (no raw intrusive data exposure)
-- Designed for **scalability and startup potential**
-
----
-
-## 📈 Impact
-
-- Encourages **independent thinking in children**
-- Reduces exposure to **harmful & misleading content**
-- Bridges gap between **parent control and child freedom**
-
----
-
-## 🏁 Hackathon Alignment (ROVO x HackByte 4.0)
-
-This project is built in alignment with:
-- Innovation in real-world problem solving
-- Scalable product vision
-- Continuous improvement and updates
-- Strong potential for incubation into a startup
+- Uses a large language model (Gemini) to understand content in context, not just match keywords — so it catches misleading content that contains no flagged words
+- Specifically targets AI-generated misinformation, not just explicit content
+- Tiered response system — fake content warns, harmful content blocks — avoiding unnecessary over-restriction
+- Real-time parent alerts in seconds, not end-of-day reports
 
 ---
 
 ## 🔮 Future Scope
 
-- Multimodal detection (images/videos)
-- Cross-device synchronization
-- Behavioral insights tracking
-- Personalized learning nudges for kids
+- Image and video content analysis
+- Mobile browser support
+- Multiple child profiles per parent account
+- School and institutional dashboard version
+- Multi-language detection
 
 ---
 
-## 👥 Team Collaboration
+## 🏁 Built For
 
-- Single unified project post
-- Continuous updates across development stages
-- Demonstrates iterative improvement
+**ROVO x HackByte 4.0**
+
+> *Because every child deserves a smarter, safer digital world.*
 
 ---
 
-## 📌 Final Note
+## 📄 License
 
-TruthLens Kids is not just a safety tool —  
-it is a step toward building a **smarter, safer, and more aware digital generation**.
+MIT License
